@@ -6,9 +6,9 @@ AS=$(TOOLCHAIN)gcc -c
 ASFLAGS=-m$(CPU)
 CC=$(TOOLCHAIN)gcc
 # My GenX has 68LC060 (no FPU) so need to use soft-float (until we write something that can leverage the Foenix' math copro!)
-CFLAGS=-m$(CPU) -Os -msoft-float
+CFLAGS=-m$(CPU) -O2 -msoft-float
 LD = $(CC) $(MULTILIBFLAGS) -nostartfiles -nostdlib
-LDFLAGS = -Wl,-T,finxos.ld
+LDFLAGS =
 OBJCOPY=$(TOOLCHAIN)objcopy
 LIBS = -lgcc
 SOURCES=startup.S main.c
@@ -18,13 +18,17 @@ OBJS=$(patsubst %.c,%.o,$(patsubst %.S,%.o,$(SOURCES)))
 
 default: finxos.s28
 
-finxos.s28: startup.o main.o
-	$(LD) $(LDFLAGS) -nostdlib -Wl,-Map,finxos.map -o finxos.elf $^
+finxos.s28: $(OBJS)
+	$(LD) $(LDFLAGS) -nostdlib -Wl,-T,finxos.ld -Wl,-Map,finxos.map -o finxos.elf $^
 	$(OBJCOPY) -O srec finxos.elf $@
+
+finxos-atari-rom.img: $(OBJS)
+	$(LD) $(LDFLAGS) -nostdlib -Wl,-T,finxos-atari-rom.ld -Wl,-Map,finxos.map -o $@ $^
+	truncate -s 262144 $@
 
 %.o:%.S
 	# This allows us to use //-style comments
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	$(RM) $(OBJS) finxos.s28 finxos.elf finxos.map
+	$(RM) $(OBJS) finxos.s28 finxos.elf finxos.map finxos-atari-rom.img

@@ -1,0 +1,180 @@
+###############################################################################
+#                                                                             #
+# Calypsi linker for Motorola 68000                               version 5.6 #
+#                                                       16/Nov/2024  20:12:50 #
+# Command line: -g linker.scm main.o -o hello.elf clib-68000-sc-sd.a -l       #
+#               --cross-reference --rtattr exit=simplified                    #
+#                                                                             #
+###############################################################################
+
+####################
+#                  #
+# Memories summary #
+#                  #
+####################
+
+Name    Range             Size     Used     Checksum  Largest unallocated
+-------------------------------------------------------------------------
+Vector  00000000-000003ff 00000400   0.8%   none      000003f8
+flash   00100000-001fffff 00100000   0.0%   none      000fffcc
+NearRAM 00200000-0020ffff 00010000   0.0%   none      00010000
+RAM     00210000-0023ffff 00030000  10.7%   none      0002ae00
+
+
+####################
+#                  #
+# Sections summary #
+#                  #
+####################
+
+Name     Range              Size     Memory Fragments
+-----------------------------------------------------
+reset    00000000-00000007  00000008 Vector 1
+nearcode 00100000-00100033  00000034 flash  6
+heap     00210000-00213fff  00004000 RAM    1
+stack    00214000-00214fff  00001000 RAM    1
+sstack   00215000-002151ff  00000200 RAM    1
+
+
+###################
+#                 #
+# Placement rules #
+#                 #
+###################
+
+Name    Address range     Key
+----------------------------------------------------------------------
+NearRAM 00200000-0020ffff 
+  > znear
+  > near
+RAM     00210000-0023ffff 
+  > sstack
+  > stack
+  > zfar
+  > far
+  > heap
+Vector  00000000-000003ff 
+  > (reset 00000000)
+flash   00100000-001fffff 
+  > (nearcode 00100000-0010a000)
+  > code
+  > inear
+  > ifar
+  > cfar
+  > switch
+  > data_init_table
+
+Name   Size     Align
+----------------------
+stack  00001000 2
+sstack 00000200 2
+heap   00004000 2
+
+Name             Memory  Offset
+----------------------------------
+_NearBaseAddress NearRAM 00008000
+
+################
+#              #
+# Object files #
+#              #
+################
+
+Unit Filename          Archive
+-----------------------------------------
+  0  main.o            -
+          >  nearcode 00000004
+  2  cstartup.o        clib-68000-sc-sd.a
+          # picked based on cstartup=normal (built-in default)
+          >  nearcode 00000028
+          >  reset    00000008
+  5  simplified_exit.o clib-68000-sc-sd.a
+          # picked based on exit=simplified (specified on the command line)
+          >  nearcode 00000006
+  6  defaultExit.o     clib-68000-sc-sd.a
+          >  nearcode 00000002
+
+###################
+#                 #
+# Cross reference #
+#                 #
+###################
+
+Section 'heap'  placed at address 00210000-00213fff of size 00004000
+(linker generated)
+
+Section 'stack'  placed at address 00214000-00214fff of size 00001000
+(linker generated)
+
+Section 'sstack'  placed at address 00215000-002151ff of size 00000200
+(linker generated)
+
+__program_root_section in section 'reset'
+ placed at address 00000000-00000007 of size 00000008
+(cstartup.o (from clib-68000-sc-sd.a) unit 2 section index 2)
+    Defines:
+        __program_root_section = 00000000
+    References:
+        .sectionEnd(sstack)
+        __program_start in (cstartup.o (from clib-68000-sc-sd.a) unit 2 section index 3)
+
+__program_start in section 'nearcode'
+ placed at address 00100000-00100019 of size 0000001a
+(cstartup.o (from clib-68000-sc-sd.a) unit 2 section index 3)
+    Defines:
+        __program_start = 00100000
+    References:
+        _NearBaseAddress
+        .sectionEnd(stack)
+        __low_level_init in (cstartup.o (from clib-68000-sc-sd.a) unit 2 section index 8)
+    Referenced from:
+        __program_root_section (cstartup.o (from clib-68000-sc-sd.a) unit 2 section index 2)
+
+Section 'nearcode'  placed at address 0010001a-00100023 of size 0000000a
+(cstartup.o (from clib-68000-sc-sd.a) unit 2 section index 7)
+    References:
+        exit in (simplified_exit.o (from clib-68000-sc-sd.a) unit 5 section index 2)
+        main in (main.o unit 0 section index 2)
+
+exit in section 'nearcode'
+ placed at address 00100024-00100029 of size 00000006
+(simplified_exit.o (from clib-68000-sc-sd.a) unit 5 section index 2)
+    Defines:
+        exit = 00100024
+    References:
+        _Stub_exit in (defaultExit.o (from clib-68000-sc-sd.a) unit 6 section index 2)
+    Referenced from:
+        (cstartup.o (from clib-68000-sc-sd.a) unit 2 section index 7)
+
+__low_level_init in section 'nearcode'
+ placed at address 0010002a-0010002d of size 00000004
+(cstartup.o (from clib-68000-sc-sd.a) unit 2 section index 8)
+    Defines:
+        __low_level_init = 0010002a
+    Referenced from:
+        __program_start (cstartup.o (from clib-68000-sc-sd.a) unit 2 section index 3)
+
+main in section 'nearcode'
+ placed at address 0010002e-00100031 of size 00000004
+(main.o unit 0 section index 2)
+    Defines:
+        main = 0010002e
+    Referenced from:
+        (cstartup.o (from clib-68000-sc-sd.a) unit 2 section index 7)
+
+_Stub_exit in section 'nearcode'
+ placed at address 00100032-00100033 of size 00000002
+(defaultExit.o (from clib-68000-sc-sd.a) unit 6 section index 2)
+    Defines:
+        _Stub_exit = 00100032
+    Referenced from:
+        exit (simplified_exit.o (from clib-68000-sc-sd.a) unit 5 section index 2)
+
+##########################
+#                        #
+# Memory sizes (decimal) #
+#                        #
+##########################
+
+Executable       (Text):    60 bytes
+Non-initialized        : 20992 bytes

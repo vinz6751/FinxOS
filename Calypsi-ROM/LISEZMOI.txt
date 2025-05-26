@@ -1,0 +1,12 @@
+241031
+La mémoire et le shifter sont initialisés
+J'en suis à initialiser l'IKBD.
+J'ai créé mfp.s mais c'est vide.
+Il faudrait activer les interruptions et mettre en place les jiffies pour pouvoir utiliser des timeouts
+lors de l'initialisation de l'IKBD (et du reste)
+
+A faire:
+Bouger les drivers hard dans un dossier séparé
+Eviter tout couplage entre les drivers hards et la couche supérieur (à voir shifter.s alloue la mémoire écran)
+
+

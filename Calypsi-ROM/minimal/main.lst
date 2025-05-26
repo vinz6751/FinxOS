@@ -1,0 +1,31 @@
+###############################################################################
+#                                                                             #
+# Calypsi ISO C compiler for Motorola 68000                       version 5.6 #
+#                                                       16/Nov/2024  20:12:50 #
+# Command line: -g -l --code-model=small main.c                               #
+#                                                                             #
+###############################################################################
+
+    \ 00000000                      .rtmodel version,"1"
+    \ 00000000                      .rtmodel nearDataBase,"A4"
+    \ 00000000                      .rtmodel core,"68000"
+    \ 00000000                      .rtmodel codeModel,"small"
+0001                    #include <stubs.h>
+0002
+0003                    __task int main () {
+    \ 00000000                      .section nearcode,text
+    \ 00000000                      .public main
+    \ 00000000                      .align  2
+    \ 00000000          main:
+0004                      return 0;
+    \ 00000000 7000                 moveq.l #0,d0
+0005                    }
+    \ 00000002 4e75                 rts
+
+##########################
+#                        #
+# Memory sizes (decimal) #
+#                        #
+##########################
+
+Executable  (Text): 4 bytes
