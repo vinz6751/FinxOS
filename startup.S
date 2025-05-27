@@ -1,8 +1,13 @@
     .extern _finxos
     .extern _stktop
     .global start
-    .global hang
+    .global _hang
 
+
+    .text
+#if 0 /* A décommenter si on veut construire une image ROM Atari */
+
+    // En-tête du système d'exploitation ATARI TOS
 #ifndef BUILD_DATE
 # define BUILD_DAY 31
 # define BUILD_MONTH 10
@@ -11,10 +16,6 @@
 #define STRINGIFY(arg) STRINGIFY_(arg)
 #define STRINGIFY_(arg) #arg
 #define ID(arg) arg
-
-    .text
-#if 0 /* A décommenter si on veut construire une image ROM Atari */
-// En-tête du système d'exploitation ATARI TOS
 _os_header:
 os_entry:	bra.s   start      // Branch to main
 os_version:	.word   0x203 // TOS version
@@ -39,31 +40,19 @@ os_dummy:	.ascii  "FTOS" // main should start at offset 0x30, shouldn't it?
 
     /* Entry Point (start is where we jump after reset) */
 start:
-    /* Bipb bip et change la couleur de la bordure */
-    move.l #16,0xfec00000
-    not.l 0xfec80008
-.w1:  move.l #1000000,d0
-.w11: nop
-    subq.l #1,d0
-    bne.s .w11
-    move.l #0,0xfec00000
-    not.l 0xfec80008
-.w2:  move.l #1000000,d0
-.w22: nop
-    subq.l #1,d0
-    bne.s .w22
-
-
+    reset
+    move.w #0x2700,sr
     
-    move.l #_stack_top,%sp
-    bra.s start
+    /* En cas de redémarrage à chaud */
+    lea _stack_top,sp
+
     /* Appel fonction principale en C */
     jbsr   _finxos
 
-    /* On n'est pas sensé retourner de finxos */
-hang:
+    /* On n'est pas sensé retourner de la fonction principale mais bon au cas où */
+_hang:
     stop #2700
-    jbra hang
+    jbra _hang
 
-   
+
     .bss

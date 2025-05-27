@@ -9,12 +9,12 @@ AS=$(TOOLCHAIN)gcc -c
 ASFLAGS=-m$(CPU)
 CC=$(TOOLCHAIN)gcc
 # My GenX has 68LC060 (no FPU) so need to use soft-float (until we write something that can leverage the Foenix' math copro!)
-CFLAGS=-m$(CPU) -O2 -msoft-float
+CFLAGS=-m$(CPU) -Os -fomit-frame-pointer -msoft-float -DMACHINE_GENX --std=c99
 LD = $(CC) -nostartfiles -nostdlib
 LDFLAGS =
 OBJCOPY=$(TOOLCHAIN)objcopy
 LIBS = -lgcc
-SOURCES=startup.S finxos.c
+SOURCES=startup.S finxos.c superio.c uart16550.c
 OBJS=$(patsubst %.c,%.o,$(patsubst %.S,%.o,$(SOURCES)))
 CP=cp
 
@@ -27,6 +27,8 @@ finxos.bin: $(OBJS)
 #       Ajoute 4 octets pour être sur que FoenixMgr ne va pas les bouffer pour des pb d'alignement
 #       Ne marche pas...
 #	$(shell truncate -s $(expr $(stat --format=%s $@) + 4) $@)
+	$(CP) $@ finxos.raw
+	truncate -s 16384 $@
 
 finxos.s28: $(OBJS)
 # Ne marche pas avec la chaîne m68k-atari-mint car elle ne supporte pas le ELF
